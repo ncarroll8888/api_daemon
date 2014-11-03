@@ -1,5 +1,18 @@
 <?php
 
+class debug {
+    static function errorLog($message) {
+	$backtrace = debug_backtrace();
+	$logMessage = time() . " Error in "  . $backtrace[1]['file'] . " line " . $backtrace[1]['line'] . ": ${message}\n";
+	file_put_contents(error_log_dest,$logMessage,FILE_APPEND);
+    }
+    static function generalLog($message,$level) {
+	global $logLevel;
+	if ($logLevel >= $level) {
+	    file_put_contents(general_log_dest,time() . " $message\n",FILE_APPEND);
+	}
+    }
+}
 class siphon {
     static function compareSilos($db, $itemId, $new) {
 	$grace = 1.05; //Allow 5% grace on comparison in case the API runs slow.
@@ -41,6 +54,9 @@ class apiKeyGrabber {
 		);
 	    }
 	} else {
+	    $sqlError = $db->error;
+	    $sqlErrorNo = $db->errorno;
+	    debug::errorLog("Got error #${sqlErrNo}: ${sqlError} when executing " . __METHOD__);
 	    $apiKeys = FALSE;
 	}
 	return($apiKeys);
@@ -57,6 +73,9 @@ class apiKeyGrabber {
 	    }
 	} else {
 	    $apiKeys = FALSE;
+	    $sqlError = $db->error;
+	    $sqlErrorNo = $db->errorno;
+	    debug::errorLog("Got error #${sqlErrNo}: ${sqlError} when executing " . __METHOD__);
 	}
 	return($apiKeys);
     }
@@ -69,6 +88,9 @@ class apiKeyGrabber {
 	    }
 	} else {
 	    $mailRcpts = FALSE;
+	    $sqlError = $db->error;
+	    $sqlErrorNo = $db->errorno;
+	    debug::errorLog("Got error #${sqlErrNo}: ${sqlError} when executing " . __METHOD__);
 	}
 	return($mailRcpts);
     }
@@ -145,10 +167,11 @@ class apiGrabber {
 	    if ($cacheResultArray['cacheduntil'] <= time()) {
 		curl_setopt($this->curl, CURLOPT_URL, $apiResource);
 		curl_setopt($this->curl, CURLOPT_POSTFIELDS, $postFields);
-		echo "Running API get on $apiResource\nPost fields: $postFields\n";
+		debug::generalLog("Setting post opts to: $postFields",9);
+		debug::generalLog("Running API get on $apiResource with post fields: $postFields",5);
 		$xmlDump = curl_exec($this->curl);
 		$curlStatus = curl_getinfo($this->curl,CURLINFO_HTTP_CODE);
-		echo "Status: $curlStatus\n\n";
+		debug::generalLog("Status: $curlStatus",5);
 		if (intval($curlStatus) == 200) {
 		    xml_parse_into_struct($this->parser,$xmlDump,$xmlStruct,$index);
 		    xml_parser_free($this->parser);
@@ -161,19 +184,23 @@ class apiGrabber {
 		    file_put_contents($xmlDumpFile,$xmlDump);
 		} else {
 		   // Acknowledge that curl failed.
+		   debug::errorLog("Expected status 200 from curl - got ${curlStatus} trying to get ${url} with postFields ${postFields}");
 		}
 	    } else {
 		// Acknowledge that cache hasn't expired
+		debug::generalLog("Cache hasn't expired on $url for keyID $id with extra opts '$extra'",9);
 	    }
 	} else {
 	    // SQL error logging
+	    $sqlError = $db->error;
+	    $sqlErrorNo = $db->errorno;
+	    debug::errorLog("Got error #${sqlErrNo}: ${sqlError} when executing " . __METHOD__);
 	}
 	if (is_array($xmlStruct)) {
 	    foreach($xmlStruct as $xmlData) {
 		if((isset($xmlData['tag'])) && ($xmlData['tag'] == 'CACHEDUNTIL')) {
 		    $xmlCacheTimer = strtotime($xmlData['value']);
 		}
-		//print_r($xmlStruct);
 	    }
 	    $updateCacheTimer = "UPDATE cache_timers SET cacheduntil=${xmlCacheTimer} WHERE id=${id} AND url='${url}' AND extra='${extra}'";
 	    $db->query($updateCacheTimer);

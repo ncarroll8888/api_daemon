@@ -1,5 +1,8 @@
 #!/usr/bin/php
 <?php
+if (posix_getuid() == 0) {
+    echo "Don't run me as root.\n";
+}
 declare(ticks = 1);
 $_SERVER['PATH'] = "/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin";
 $stdout = fopen('php://stdout','a');

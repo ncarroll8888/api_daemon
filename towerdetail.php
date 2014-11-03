@@ -12,7 +12,7 @@ $db->query($cleanup);
 
 foreach($towerDetailKeys as $apiChar => $apiKey) {
     $chatChannel = "towerupdates.${apiChar}";
-    $bubbles->newChannel($chatChannel,"Updated control tower states","The status of the following control towers has changed:");
+    $bubbles->newChannel($chatChannel,"Updated control tower states for $apiChar","The status of the following control towers has changed");
     $towerDetailGrabber = new apiGrabber();
     $getTowerLocations = "SELECT itemid,moonid,typeid FROM location WHERE apiid = " . $apiKey['id'];
     $towerLocations = $db->query($getTowerLocations);

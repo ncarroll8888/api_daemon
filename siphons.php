@@ -32,13 +32,15 @@ foreach($siphonApiKeys as $label => $apiKey) {
 		} else {
 		    $siloCompareResult = siphon::compareSilos($db,$siloId,$siloQuantity);
 		    if ( $siloCompareResult >= 1 ) {
-			$message = "Warning: Siphon detected on silo ${siloId} in system ${solarSystemName}.\nCurrently ${siloQuantity} units in silo, filling at ${siloCompareResult} units/hour";
+			$message = "Warning: Siphon detected on silo ${siloId} in system ${solarSystemName}.\nCurrently ${siloQuantity} units in silo, filling at ${siloCompareResult} units/hour\n";
 		    } elseif ($siloCompareResult == -1) {
-			$message = "Warning: Silo with ID ${siloId} in system ${solarSystemName} is not filling.\nCurrently ${siloQuantity} units in silo.";
+			$message = "Warning: Silo with ID ${siloId} in system ${solarSystemName} is not filling.\nCurrently ${siloQuantity} units in silo.\n";
 		    } elseif ($siloCompareResult == 0) {
-			$message = "OK: Silo with ID ${siloId} in system ${solarSystemName} fillrate in-bounds.\nCurrently ${siloQuantity} units in silo.";
+			$message = "OK: Silo with ID ${siloId} in system ${solarSystemName} fillrate in-bounds.\nCurrently ${siloQuantity} units in silo.\n";
+		    } elseif ($siloCompareResult == -2) {
+			$message = "Unknown: Silo with ID ${siloId} in system ${solarSystemName} fillrate exceeds expected. Check config\n";
 		    } else {
-			$message = "Error: Uncaught signal ${siloCompareResult} from siphon::CompareSilos()\n"; //TODO Make this an actual log entry.
+			debug::errorLog("siphon::compareSilos returned unexpected value $siloCompareResult when checking $siloId");
 		    }
 		}
 		$updateSiloQuantity = "UPDATE silos SET quantity=${siloQuantity},lastupdate=" . time() . " WHERE itemID = ${siloId}";

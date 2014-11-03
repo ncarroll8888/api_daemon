@@ -1,4 +1,5 @@
 <?php
+$pwd=getcwd();
 include('settings.php');
 include('db.php');
 $keyID = 0;
