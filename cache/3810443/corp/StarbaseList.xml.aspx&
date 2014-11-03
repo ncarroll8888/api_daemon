@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<eveapi version="2">
+  <currentTime>2014-11-03 07:38:26</currentTime>
+  <result>
+    <rowset name="starbases" key="itemID" columns="itemID,typeID,locationID,moonID,state,stateTimestamp,onlineTimestamp,standingOwnerID">
+      <row itemID="1014488444990" typeID="16213" locationID="30003480" moonID="40220771" state="4" stateTimestamp="2014-11-03 07:55:42" onlineTimestamp="2014-10-29 22:55:29" standingOwnerID="98026435" />
+      <row itemID="1014506452561" typeID="16213" locationID="30004121" moonID="40261115" state="4" stateTimestamp="2014-11-03 07:54:44" onlineTimestamp="2014-10-30 00:54:31" standingOwnerID="98026435" />
+    </rowset>
+  </result>
+  <cachedUntil>2014-11-03 12:13:21</cachedUntil>
+</eveapi>
