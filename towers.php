@@ -42,12 +42,15 @@ $getOldTowersQuery = "SELECT moonid,
 			     INNER JOIN ${staticDatabase}.mapDenormalize on (${staticDatabase}.mapDenormalize.itemID = moonid)
 			     INNER JOIN ${staticDatabase}.invTypes on (${staticDatabase}.invTypes.typeID = location.typeid)
 			     WHERE (${now} - lastupdate) > 43140"; //30 seconds of grace
-$oldTowersResult = $db->query($getOldTowersQuery);
-while ( $oldTower = $oldTowersResult->fetch_array() ) {
-    $deleteOldTowerQuery = "DELETE FROM location WHERE moonid = " . $oldTower['moonid'];
-    if ($db->query($deleteOldTowerQuery)) {
-	$bubbles->newMessage("\nDeleted" . $oldTower['towerName'] . " from " . $oldTower['moonName'],"oldtowers");
+if ($oldTowersResult = $db->query($getOldTowersQuery)) {
+    while ( $oldTower = $oldTowersResult->fetch_array() ) {
+	$deleteOldTowerQuery = "DELETE FROM location WHERE moonid = " . $oldTower['moonid'];
+	    if ($db->query($deleteOldTowerQuery)) {
+	    $bubbles->newMessage("\nDeleted" . $oldTower['towerName'] . " from " . $oldTower['moonName'],"oldtowers");
+	}
     }
+} else {
+     echo $getOldTowersQuery;
 }
 
 ?>

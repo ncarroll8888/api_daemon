@@ -1,7 +1,6 @@
 <?php
 $notificationKeys = apiKeyGrabber::char('notifications',$db);
 $mailRcpts = apiKeyGrabber::rcpts('notifications',$db);
-$staticDatabase = 'rubicon';
 $mail = FALSE;
 $mailSubject = "EVE - Notifications";
 $mailBody = "Notifications pulled from eve API\n";
@@ -9,6 +8,7 @@ $notificationUrl = "/char/Notifications.xml.aspx";
 foreach($notificationKeys as $keyName => $apiKey) {
     $notifies = new apiGrabber();
     $notifyCounter = new notifyCounter();
+    $possibleKeys = array_keys($notifyCounter->alertCounters);
     $channel = "notify ${keyName}";
     $bubbles->newChannel($channel,"Notifications from ${keyName}",'Important messages in notification queue');
     $extra = "characterID=" . $apiKey['charid'];
@@ -16,9 +16,11 @@ foreach($notificationKeys as $keyName => $apiKey) {
 	$now = time();
 	foreach($xmlArray as $notificationOutput) {
 	    if ($notificationOutput['tag'] == 'ROW') {
-		$notificationID = $notificationOutput['attributes']['TYPEID'];
+		$notificationID = intval($notificationOutput['attributes']['TYPEID']);
 		$notificationTime = strtotime($notificationOutput['attributes']['SENTDATE']);
-		if ((in_array($notificationID,array_keys($notifyCounter->alertCounters))) && (($now - $notificationTime) < 1830)) {
+		$age = ($now - $notificationTime);
+		$inarray = in_array($notificationID,$possibleKeys);
+		if (($age <= 1830) && ($inarray))  {
 		    $notifyCounter->increment($notificationID);
 	    	}
 	    }

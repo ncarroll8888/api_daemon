@@ -99,7 +99,7 @@ class notifyCounter {
 	);
     }
     public function increment($id) {
-	$this->alertCounters[$id]++;
+	$this->alertCounters[$id]['count']++;
     }
     public function dump () {
 	foreach($this->alertCounters as $alertID => $alert) {
